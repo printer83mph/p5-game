@@ -64,7 +64,6 @@ function drawPlanets() {
 function updatePhys() {
   pos.add(vel);
   doPolarityPhys();
-  checkCollisions();
 }
 
 function Planet(x,y,pol) {
