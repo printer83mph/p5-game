@@ -1,9 +1,5 @@
 /**/
-<<<<<<< Updated upstream
-var pos,vel,polarity,planets,avgXVel,lastAddition;
-=======
 var pos,vel,polarity,planets,avgXVel,bufferX;
->>>>>>> Stashed changes
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 400;
