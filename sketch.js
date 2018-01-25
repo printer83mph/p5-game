@@ -9,8 +9,10 @@ var planets = [];
 
 function setup() {
   createCanvas(1280,720);
-  strokeWeight(10);
+  strokeWeight(3);
   noStroke();
+  planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
+  planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
 }
 
@@ -32,30 +34,25 @@ function drawMe() {
 function drawPlanets() {
   for (i in planets) {
     let planet = planets[i];
-    fill(planet.polarity ? "rgba(3, 0, 224, 0.8)" : "rgba(224, 0, 0, 0.8)"); //mag field
+    fill(planet.polarity ? "#00a" : "#a00"); //mag field
     ellipse(planet.pos.x,planet.pos.y,magFieldRad,magFieldRad);
+  }
+  for (i in planets) {
+    let planet = planets[i];
     fill(planet.polarity ? "#00f" : "#f00"); //planet
     ellipse(planet.pos.x,planet.pos.y,planetRad*2,planetRad*2);
   }
 }
 
 function updatePhys() {
-  doPolarityPhys();
-  moveMe();
-}
-
-function moveMe() {
   pos.add(vel);
+  doPolarityPhys();
+  checkCollisions();
 }
 
 function Planet(x,y,pol) {
   this.pos = new p5.Vector(x,y);
   this.polarity = pol;
-}
-
-function returnClosestPoint(P1,P2,var v) {
-  return P1 + ( (P2.sub(P1)) * dot)
-
 }
 
 function doPolarityPhys() {
@@ -65,16 +62,38 @@ function doPolarityPhys() {
     let dis = planet.pos.dist(pos);
     if (dis < magFieldRad/2 + rad) {
       if (dis < planetRad + rad) {
-        let angleToPlayer = p5.Vector.sub(planet.pos,pos).heading();
-        
+        let vecFromPlanet = p5.Vector.sub(planet.pos,pos).normalize();
+        pos.set(p5.Vector.mult(vecFromPlanet,-planetRad-rad).add(planet.pos));
+        // let velAngle = vel.heading();
+        vel.sub(p5.Vector.mult(vecFromPlanet,vel.dot(vecFromPlanet)*1.5));
       } else {
         if (polarity == planet.polarity) { //repel
-          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(-10/dis));
+          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(-1000/dis**2));
         } else { //attract
-          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(10/dis));
-          vel.mult(0.99);
+          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(1000/dis**2));
+          vel.mult(0.998);
         }
       }
     }
   }
+}
+
+function checkCollisions() {
+  if (pos.x > width - rad) {
+    pos.x = width - rad;
+    vel.x *= -0.9;
+  } else if (pos.x < rad) {
+    pos.x = rad;
+    vel.x *= -0.9;
+  } if (pos.y > height - rad) {
+    pos.y = height - rad;
+    vel.y *= -0.9;
+  } else if (pos.y < rad) {
+    pos.y = rad;
+    vel.y *= -0.9;
+  }
+}
+
+function keyPressed() {
+  polarity = !polarity;
 }
