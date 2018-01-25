@@ -1,16 +1,23 @@
 /**/
-var vel = new p5.Vector(3,0);
-var pos = new p5.Vector(150,400);
+var pos,vel,polarity,planets;
 const rad = 10;
-const planetRad = 20;
+const planetRad = 50;
 const magFieldRad = 400;
-var polarity = true;    //true -> positive --- false -> negative
-var planets = [];
+// true -> positive --- false -> negative
+
 
 function setup() {
   createCanvas(1280,720);
   strokeWeight(3);
   noStroke();
+  restart();
+}
+
+function restart() {
+  vel = new p5.Vector(3,0);
+  pos = new p5.Vector(150,400);
+  polarity = true;
+  planets = [];
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
@@ -32,11 +39,11 @@ function drawMe() {
 }
 
 function drawPlanets() {
-  for (i in planets) {
-    let planet = planets[i];
-    fill(planet.polarity ? "#00a" : "#a00"); //mag field
-    ellipse(planet.pos.x,planet.pos.y,magFieldRad,magFieldRad);
-  }
+  // for (i in planets) {
+  //   let planet = planets[i];
+  //   fill(planet.polarity ? "#00a" : "#a00"); //mag field
+  //   ellipse(planet.pos.x,planet.pos.y,magFieldRad,magFieldRad);
+  // }
   for (i in planets) {
     let planet = planets[i];
     fill(planet.polarity ? "#00f" : "#f00"); //planet
@@ -60,7 +67,7 @@ function doPolarityPhys() {
   for (i in planets) {
     planet = planets[i]
     let dis = planet.pos.dist(pos);
-    if (dis < magFieldRad/2 + rad) {
+    // if (dis < magFieldRad/2 + rad) {
       if (dis < planetRad + rad) {
         let vecFromPlanet = p5.Vector.sub(planet.pos,pos).normalize();
         pos.set(p5.Vector.mult(vecFromPlanet,-planetRad-rad).add(planet.pos));
@@ -74,7 +81,7 @@ function doPolarityPhys() {
           vel.mult(0.998);
         }
       }
-    }
+    // }
   }
 }
 
@@ -94,6 +101,12 @@ function checkCollisions() {
   }
 }
 
-function keyPressed() {
+function mousePressed() {
   polarity = !polarity;
+}
+
+function keyPressed() {
+  if (key == 'R') {
+    restart();
+  }
 }
