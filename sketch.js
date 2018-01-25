@@ -1,9 +1,9 @@
 /**/
-var pos,vel,polarity,planets,avgXVel;
+var pos,vel,polarity,planets,avgXVel,lastAddition;
 const rad = 10;
 const planetRad = 50;
 const magFieldRad = 400;
-// true -> positive --- false -> negative
+
 
 
 function setup() {
@@ -18,14 +18,24 @@ function restart() {
   avgXVel = 0;
   avgYVel = 0;
   pos = new p5.Vector(150,400);
-  polarity = true;
+  polarity = true; // true -> positive --- false -> negative
   planets = [];
+  //on-screen planets
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
+  //off screen planets
+  for (var i = 0; i < 400; i++) {
+  	addOffScreenPlanet();
+  }
 }
 
 function draw() {
+
+  if (frameCount > lastAddition + 180) {
+
+  }
+
   resetMatrix();
   translate(-pos.x + 640 - avgXVel*30,-pos.y + 360 - avgYVel*30);
   background(0);
@@ -37,15 +47,29 @@ function draw() {
 
 }
 
+function addOffScreenPlanet() { //thomas hlep
+	var x = 0;
+	var y = 0;
+
+	while (x >= 0-magFieldRad && x <= 1280+magFieldRad ) {
+		x = Math.random()*2000;
+		x += x*-2*round(Math.random());
+	console.log("x defined as "+x);
+	}
+	while (y >= 0-magFieldRad && y <= 720+magFieldRad ) {
+		y = Math.random()*1500;
+		y += y*-2*round(Math.random());
+	console.log("y defined as "+y);
+	}
+	planets.push(new Planet(x,y,Math.random() < -0.5));
+	console.log("planet pushed.")
+}
+
 function drawMe() {
   stroke(polarity ? "#00f" : "#f00");
   fill(255);
   ellipse(pos.x,pos.y,rad*2,rad*2); //player
   noStroke();
-}
-
-function drawMagFields() {
-
 }
 
 function drawPlanets() {
