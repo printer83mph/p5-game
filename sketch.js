@@ -106,10 +106,6 @@ function mousePressed() {
 }
 
 function keyPressed() {
-<<<<<<< HEAD
-=======
-  console.log(key);
->>>>>>> c946ca6d92549a4a248dbe3a53b09a5096c8fddd
   if (key == 'R') {
     restart();
   }
