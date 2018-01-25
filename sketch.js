@@ -1,7 +1,11 @@
 /**/
+<<<<<<< Updated upstream
 var pos,vel,polarity,planets,avgXVel,lastAddition;
+=======
+var pos,vel,polarity,planets,avgXVel,bufferX;
+>>>>>>> Stashed changes
 const rad = 10;
-const planetRad = 50;
+const planetRad = 70;
 const magFieldRad = 400;
 
 
@@ -15,6 +19,7 @@ function setup() {
 
 function restart() {
   vel = new p5.Vector(3,0);
+  bufferX = 500;
   avgXVel = 0;
   avgYVel = 0;
   pos = new p5.Vector(150,400);
@@ -37,7 +42,7 @@ function draw() {
   }
 
   resetMatrix();
-  translate(-pos.x + 640 - avgXVel*30,-pos.y + 360 - avgYVel*30);
+  translate(-pos.x + 640 - avgXVel*35,-pos.y + 360 - avgYVel*20);
   background(0);
   updatePhys();
   avgXVel += (vel.x - avgXVel)*0.01;
@@ -87,6 +92,10 @@ function drawPlanets() {
 
 function updatePhys() {
   pos.add(vel);
+  if (pos.x > bufferX) {
+    planets.push(new Planet(pos.x + Math.random()*1100+180,pos.y + Math.random()*720, Math.random() < 0.5));
+    bufferX = pos.x + 250
+  }
   doPolarityPhys();
 }
 
@@ -100,20 +109,18 @@ function doPolarityPhys() {
   for (i in planets) {
     planet = planets[i]
     let dis = planet.pos.dist(pos);
-    // if (dis < magFieldRad/2 + rad) {
-      if (dis < planetRad + rad) {
-        let vecFromPlanet = p5.Vector.sub(planet.pos,pos).normalize();
-        pos.set(p5.Vector.mult(vecFromPlanet,-planetRad-rad).add(planet.pos));
-        // let velAngle = vel.heading();
-        vel.sub(p5.Vector.mult(vecFromPlanet,vel.dot(vecFromPlanet)*1.5));
-      } else {
-        if (polarity == planet.polarity) { //repel
-          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(-1000/dis**2));
-        } else { //attract
-          vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(1000/dis**2));
-        }
+    if (dis < planetRad + rad) {
+      let vecFromPlanet = p5.Vector.sub(planet.pos,pos).normalize();
+      pos.set(p5.Vector.mult(vecFromPlanet,-planetRad-rad).add(planet.pos));
+      // let velAngle = vel.heading();
+      vel.sub(p5.Vector.mult(vecFromPlanet,vel.dot(vecFromPlanet)*1.5));
+    } else {
+      if (polarity == planet.polarity) { //repel
+        vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(-100/(dis*0.2)**2));
+      } else { //attract
+        vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(100/(dis*0.2)**2));
       }
-    // }
+    }
   }
 }
 
