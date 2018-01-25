@@ -1,5 +1,5 @@
 /**/
-var pos,vel,polarity,planets;
+var pos,vel,polarity,planets,avgXVel;
 const rad = 10;
 const planetRad = 50;
 const magFieldRad = 400;
@@ -15,6 +15,8 @@ function setup() {
 
 function restart() {
   vel = new p5.Vector(3,0);
+  avgXVel = 0;
+  avgYVel = 0;
   pos = new p5.Vector(150,400);
   polarity = true;
   planets = [];
@@ -24,11 +26,15 @@ function restart() {
 }
 
 function draw() {
+  resetMatrix();
+  translate(-pos.x + 640 - avgXVel*30,-pos.y + 360 - avgYVel*30);
   background(0);
-
   updatePhys();
+  avgXVel += (vel.x - avgXVel)*0.01;
+  avgYVel += (vel.y - avgYVel)*0.01;
   drawPlanets();
   drawMe();
+
 }
 
 function drawMe() {
@@ -38,12 +44,16 @@ function drawMe() {
   noStroke();
 }
 
+function drawMagFields() {
+
+}
+
 function drawPlanets() {
-  // for (i in planets) {
-  //   let planet = planets[i];
-  //   fill(planet.polarity ? "#00a" : "#a00"); //mag field
-  //   ellipse(planet.pos.x,planet.pos.y,magFieldRad,magFieldRad);
-  // }
+  for (i in planets) {
+    let planet = planets[i];
+    fill(planet.polarity ? "rgba(0,0,255,0.4)" : "rgba(255,0,0,0.4)"); //mag field
+    ellipse(planet.pos.x,planet.pos.y,magFieldRad,magFieldRad);
+  }
   for (i in planets) {
     let planet = planets[i];
     fill(planet.polarity ? "#00f" : "#f00"); //planet
@@ -78,28 +88,27 @@ function doPolarityPhys() {
           vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(-1000/dis**2));
         } else { //attract
           vel.add(p5.Vector.sub(planet.pos,pos).normalize().mult(1000/dis**2));
-          vel.mult(0.998);
         }
       }
     // }
   }
 }
 
-function checkCollisions() {
-  if (pos.x > width - rad) {
-    pos.x = width - rad;
-    vel.x *= -0.9;
-  } else if (pos.x < rad) {
-    pos.x = rad;
-    vel.x *= -0.9;
-  } if (pos.y > height - rad) {
-    pos.y = height - rad;
-    vel.y *= -0.9;
-  } else if (pos.y < rad) {
-    pos.y = rad;
-    vel.y *= -0.9;
-  }
-}
+// function checkCollisions() {
+//   if (pos.x > width - rad) {
+//     pos.x = width - rad;
+//     vel.x *= -0.9;
+//   } else if (pos.x < rad) {
+//     pos.x = rad;
+//     vel.x *= -0.9;
+//   } if (pos.y > height - rad) {
+//     pos.y = height - rad;
+//     vel.y *= -0.9;
+//   } else if (pos.y < rad) {
+//     pos.y = rad;
+//     vel.y *= -0.9;
+//   }
+// }
 
 function mousePressed() {
   polarity = !polarity;
