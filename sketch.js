@@ -1,4 +1,4 @@
-/**/
+/* p5 magnet game with willybh */
 var pos, vel, polarity, planets, avgXVel, bufferX, cameraPos;
 const rad = 10;
 const planetRad = 70;
