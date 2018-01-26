@@ -1,5 +1,5 @@
 /**/
-var pos,vel,polarity,planets,avgXVel,bufferX;
+var pos,vel,polarity,planets,avgXVel,bufferX,cameraPos;
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 400;
@@ -14,17 +14,18 @@ function setup() {
 }
 
 function restart() {
-  vel = new p5.Vector(3,0);
+  cameraPos = new p5.Vector(0,0);
+  vel = new p5.Vector(-3,0);
   bufferX = 600;
   avgXVel = 0;
   avgYVel = 0;
-  pos = new p5.Vector(150,400);
+  pos = new p5.Vector(0,0);
   polarity = true; // true -> positive --- false -> negative
   planets = [];
   //on-screen planets
-  planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
-  planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
-  planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
+  // planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
+  // planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
+  // planets.push(new Planet(Math.random()*1100+180,Math.random()*720,Math.random() < 0.5)); //test planet
   //off screen planets
   // for (var i = 0; i < 400; i++) {
   // 	addOffScreenPlanet();
@@ -38,7 +39,8 @@ function draw() {
   // }
 
   resetMatrix();
-  translate(-pos.x + 640 - avgXVel*35,-pos.y + 360 - avgYVel*20);
+  cameraPos.set(-pos.x + 640 - avgXVel*35,-pos.y + 360 - avgYVel*20);
+  translate(cameraPos.x,cameraPos.y);
   background(0);
   updatePhys();
   avgXVel += (vel.x - avgXVel)*0.01;
@@ -89,9 +91,10 @@ function drawPlanets() {
 function updatePhys() {
   pos.add(vel);
   if (pos.x > bufferX) {
-    planets.push(new Planet(pos.x + Math.random()*1100+180,pos.y + Math.random()*720, Math.random() < 0.5));
+    planets.push(new Planet(pos.x + Math.random()*1100-180,pos.y + Math.random()*720-360, Math.random() < 0.5));
     bufferX = pos.x + 600
   }
+  createPlanet();
   doPolarityPhys();
 }
 
@@ -100,10 +103,68 @@ function Planet(x,y,pol) {
   this.polarity = pol;
 }
 
+function planetIsOffscreen(planet) {
+  return (planet.pos.x > width+300-cameraPos.x) || (planet.pos.x < -cameraPos.x-300) || (planet.pos.y > height+300-cameraPos.y) || (planet.pos.y < -cameraPos.y-300);
+}
+
+function createPlanet() {
+  fill(0,255,0);
+  let workingPoint = new p5.Vector();
+  var working = true;
+  if (vel.heading() < 0) {
+    rect(-cameraPos.x,-cameraPos.y,width,100);
+    workingPoint.y = -cameraPos.y-300;
+    // up
+  } else {
+    rect(-cameraPos.x,-cameraPos.y+height-100,width,100);
+    workingPoint.y = -cameraPos.y+height+300;
+    // down
+  }
+  workingPoint.x = -cameraPos.x+Math.random()*width;
+  for (i in planets) {
+    if (planets[i].pos.dist(workingPoint) < 600) {
+      working = false;
+    }
+  }
+  if (working) {
+    planets.push(new Planet(workingPoint.x,workingPoint.y,Math.random() < 0.5));
+  }
+
+  if (abs(vel.heading()) > Math.PI/2) {
+    rect(-cameraPos.x,-cameraPos.y,100,height);
+
+    workingPoint.x = -cameraPos.x - 300;
+
+    // left
+  } else {
+    rect(-cameraPos.x+width-100,-cameraPos.y,100,height);
+
+    workingPoint.x = -cameraPos.x + width + 300;
+    // right
+  }
+  workingPoint.y = -cameraPos.y + Math.random()*height;
+  working = true;
+  for (i in planets) {
+    if (planets[i].pos.dist(workingPoint) < 600) {
+      working = false;
+    }
+  }
+  if (working) {
+    planets.push(new Planet(workingPoint.x,workingPoint.y,Math.random() < 0.5));
+  }
+}
+
 function doPolarityPhys() {
   var planet;
-  for (i in planets) {
+  var i = planets.length;
+  while (i--) {
     planet = planets[i]
+    if (planetIsOffscreen(planet)) {
+      if (Math.abs(p5.Vector.sub(planet.pos,pos).heading() - vel.heading()) > Math.PI/2) {
+        planets.splice(i,1);
+        continue;
+      }
+    }
     let dis = planet.pos.dist(pos);
     if (dis < planetRad + rad) {
       let vecFromPlanet = p5.Vector.sub(planet.pos,pos).normalize();
