@@ -4,8 +4,6 @@ const rad = 10;
 const planetRad = 70;
 const magFieldRad = 400;
 
-
-
 function setup() {
   createCanvas(1280, 720);
   strokeWeight(3);
@@ -25,7 +23,6 @@ function restart() {
 }
 
 function draw() {
-
   resetMatrix();
   cameraPos.set(-pos.x + 640 - avgXVel * 35, -pos.y + 360 - avgYVel * 20);
   translate(cameraPos.x, cameraPos.y);
@@ -35,7 +32,6 @@ function draw() {
   avgYVel += (vel.y - avgYVel) * 0.01;
   drawPlanets();
   drawMe();
-
 }
 
 function drawWall() {
@@ -104,16 +100,12 @@ function createPlanet() {
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
   }
-
   if (abs(vel.heading()) > Math.PI / 2) {
     rect(-cameraPos.x, -cameraPos.y, 100, height);
-
     workingPoint.x = -cameraPos.x - 300;
-
     // left
   } else {
     rect(-cameraPos.x + width - 100, -cameraPos.y, 100, height);
-
     workingPoint.x = -cameraPos.x + width + 300;
     // right
   }
