@@ -68,6 +68,11 @@ function draw() {
 // 	console.log("planet pushed.")
 // }
 
+function drawWall() {
+  fill(255,0,255);
+  rect(0,pos.y-400,wallWidth+Math.random()*3,1280);
+}
+
 function drawMe() {
   stroke(polarity ? "#00f" : "#f00");
   fill(255);
