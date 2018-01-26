@@ -42,7 +42,7 @@ function drawWall() {
 function drawMe() {
   stroke(polarity ? "#00f" : "#f00");
   fill(255);
-  ellipse(pos.x, pos.y, rad * 2, rad * 2); //player
+  ellipse(pos.x, pos.y, rad * 2); //player
   noStroke();
 }
 
@@ -50,12 +50,12 @@ function drawPlanets() {
   for (i in planets) {
     let planet = planets[i];
     fill(planet.polarity ? "rgba(0,0,255,0.4)" : "rgba(255,0,0,0.4)"); //mag field
-    ellipse(planet.pos.x, planet.pos.y, magFieldRad, magFieldRad);
+    ellipse(planet.pos.x, planet.pos.y, magFieldRad);
   }
   for (i in planets) {
     let planet = planets[i];
     fill(planet.polarity ? "#00f" : "#f00"); //planet
-    ellipse(planet.pos.x, planet.pos.y, planetRad * 2, planetRad * 2);
+    ellipse(planet.pos.x, planet.pos.y, planetRad * 2);
   }
 }
 
