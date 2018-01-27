@@ -96,7 +96,6 @@ function createPlanet() {
   }
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
-    console.log("Made planet at",workingPoint.x,workingPoint.y);
   }
 
   if (abs(vel.heading()) > Math.PI / 2) {
@@ -119,14 +118,13 @@ function createPlanet() {
   }
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
-    console.log("Made planet at",workingPoint.x,workingPoint.y);
   }
 }
 
 function doPolarityPhys() {
   var planet;
   var i = planets.length;
-  var despawnLogic = frameCount % 60 == 0;
+  var despawnLogic = frameCount == lastCreation;
   while (i--) {
     planet = planets[i]
     if (despawnLogic) {
