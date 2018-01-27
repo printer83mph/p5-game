@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, bufferX, cameraPos;
+var pos, vel, polarity, planets, avgXVel, cameraPos;
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 400;
@@ -13,8 +13,7 @@ function setup() {
 
 function restart() {
   cameraPos = new p5.Vector(0, 0);
-  vel = new p5.Vector(-3, 0);
-  bufferX = 600;
+  vel = new p5.Vector(3, 0);
   avgXVel = 0;
   avgYVel = 0;
   pos = new p5.Vector(0, 0);
@@ -49,7 +48,7 @@ function drawMe() {
 function drawPlanets() {
   for (i in planets) {
     let planet = planets[i];
-    fill(planet.polarity ? "rgba(0,0,255,0.4)" : "rgba(255,0,0,0.4)"); //mag field
+    fill(planet.polarity ? "#008" : "#800"); //mag field
     ellipse(planet.pos.x, planet.pos.y, magFieldRad);
   }
   for (i in planets) {
@@ -61,11 +60,7 @@ function drawPlanets() {
 
 function updatePhys() {
   pos.add(vel);
-  if (pos.x > bufferX) {
-    planets.push(new Planet(pos.x + Math.random() * 1100 - 180, pos.y + Math.random() * 720 - 360, Math.random() < 0.5));
-    bufferX = pos.x + 600
-  }
-  createPlanet();
+  if (frameCount % 10 == 0) {createPlanet();}
   doPolarityPhys();
 }
 
@@ -82,37 +77,41 @@ function createPlanet() {
   fill(0, 255, 0);
   let workingPoint = new p5.Vector();
   var working = true;
+
   if (vel.heading() < 0) {
-    rect(-cameraPos.x, -cameraPos.y, width, 100);
+    // rect(-cameraPos.x, -cameraPos.y, width, 100);
     workingPoint.y = -cameraPos.y - 300;
     // up
   } else {
-    rect(-cameraPos.x, -cameraPos.y + height - 100, width, 100);
+    // rect(-cameraPos.x, -cameraPos.y + height - 100, width, 100);
     workingPoint.y = -cameraPos.y + height + 300;
     // down
   }
   workingPoint.x = -cameraPos.x + Math.random() * width;
   for (i in planets) {
-    if (planets[i].pos.dist(workingPoint) < 600) {
+    if (planets[i].pos.dist(workingPoint) < Math.random()*300 + 400) {
       working = false;
     }
   }
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
   }
+
   if (abs(vel.heading()) > Math.PI / 2) {
-    rect(-cameraPos.x, -cameraPos.y, 100, height);
+    // rect(-cameraPos.x, -cameraPos.y, 100, height);
     workingPoint.x = -cameraPos.x - 300;
     // left
-  } else {
-    rect(-cameraPos.x + width - 100, -cameraPos.y, 100, height);
+  }
+
+  else {
+    // rect(-cameraPos.x + width - 100, -cameraPos.y, 100, height);
     workingPoint.x = -cameraPos.x + width + 300;
     // right
   }
   workingPoint.y = -cameraPos.y + Math.random() * height;
   working = true;
   for (i in planets) {
-    if (planets[i].pos.dist(workingPoint) < 600) {
+    if (planets[i].pos.dist(workingPoint) < Math.random()*300 + 400) {
       working = false;
     }
   }
