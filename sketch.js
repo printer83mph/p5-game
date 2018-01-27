@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation;
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 400;
@@ -19,6 +19,7 @@ function restart() {
   pos = new p5.Vector(0, 0);
   polarity = true; // true -> positive --- false -> negative
   planets = [];
+  lastCreation = 0;
 }
 
 function draw() {
@@ -60,7 +61,7 @@ function drawPlanets() {
 
 function updatePhys() {
   pos.add(vel);
-  if (frameCount % 10 == 0) {createPlanet();}
+  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount}
   doPolarityPhys();
 }
 
@@ -95,6 +96,7 @@ function createPlanet() {
   }
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
+    console.log("Made planet at",workingPoint.x,workingPoint.y);
   }
 
   if (abs(vel.heading()) > Math.PI / 2) {
@@ -117,18 +119,23 @@ function createPlanet() {
   }
   if (working) {
     planets.push(new Planet(workingPoint.x, workingPoint.y, Math.random() < 0.5));
+    console.log("Made planet at",workingPoint.x,workingPoint.y);
   }
 }
 
 function doPolarityPhys() {
   var planet;
   var i = planets.length;
+  var despawnLogic = frameCount % 60 == 0;
   while (i--) {
     planet = planets[i]
-    if (planetIsOffscreen(planet)) {
-      if (Math.abs(p5.Vector.sub(planet.pos, pos).heading() - vel.heading()) > Math.PI / 2) {
-        planets.splice(i, 1);
-        continue;
+    if (despawnLogic) {
+      if (planetIsOffscreen(planet)) {
+        if (Math.abs(p5.Vector.sub(planet.pos, pos).heading() - vel.heading()) > Math.PI / 2) {
+          planets.splice(i, 1);
+          console.log("Deleted planet");
+          continue;
+        }
       }
     }
     let dis = planet.pos.dist(pos);
