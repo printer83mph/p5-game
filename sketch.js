@@ -152,12 +152,10 @@ function doPolarityPhys() {
   }
 }
 
-function mousePressed() {
-  polarity = !polarity;
-}
-
 function keyPressed() {
   if (key == 'R') {
     restart();
+  } else if (key == " ") {
+    polarity = !polarity;
   }
 }
