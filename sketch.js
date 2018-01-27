@@ -1,14 +1,16 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText;
 const rad = 10;
 const planetRad = 70;
-const magFieldRad = 400;
+const magFieldRad = 200;
 
 function setup() {
   createCanvas(1280, 720);
+  scoreText = document.getElementById("score");
   strokeWeight(3);
   noStroke();
   restart();
+  textSize(24);
 }
 
 function restart() {
@@ -20,6 +22,9 @@ function restart() {
   polarity = true; // true -> positive --- false -> negative
   planets = [];
   lastCreation = 0;
+  wallPos = -500;
+  fuel = 100;
+  score = 0;
 }
 
 function draw() {
@@ -32,11 +37,28 @@ function draw() {
   avgYVel += (vel.y - avgYVel) * 0.01;
   drawPlanets();
   drawMe();
+  drawWall();
+  doUI();
+}
+
+function doUI() {
+  if (frameCount % 60 == 0) {
+    scoreText.innerHTML = int(scoreText.innerHTML) + 100;
+  }
+  if (fuel < 30) {
+    fill(255,sin(frameCount/50)*70);
+    rect(-cameraPos.x,-cameraPos.y,width,height);
+  }
+  fill(255);
+  rect(pos.x - 55, pos.y - 55, 110, 20);
+  fill(0);
+  rect(pos.x - fuel/2,pos.y - 50, fuel , 10);
 }
 
 function drawWall() {
-  fill(255, 0, 255);
-  rect(0, pos.y - 400, wallWidth + Math.random() * 3, 1280);
+  fill(255,0,255);
+  rect(-cameraPos.x, -cameraPos.y, max(0,wallPos+cameraPos.x), height);
+  wallPos += 2;
 }
 
 function drawMe() {
@@ -50,24 +72,27 @@ function drawPlanets() {
   for (i in planets) {
     let planet = planets[i];
     fill(planet.polarity ? "#008" : "#800"); //mag field
-    ellipse(planet.pos.x, planet.pos.y, magFieldRad);
+    ellipse(planet.pos.x, planet.pos.y, magFieldRad * 2);
   }
   for (i in planets) {
     let planet = planets[i];
-    fill(planet.polarity ? "#00f" : "#f00"); //planet
+    if (planet.station) {
+      fill(0,255,255);
+    } else {fill(planet.polarity ? "#00f" : "#f00");} //planet
     ellipse(planet.pos.x, planet.pos.y, planetRad * 2);
   }
 }
 
 function updatePhys() {
   pos.add(vel);
-  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount}
+  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount; fuel--;}
   doPolarityPhys();
 }
 
 function Planet(x, y, pol) {
   this.pos = new p5.Vector(x, y);
   this.polarity = pol;
+  this.station = Math.random() < 0.2;
 }
 
 function planetIsOffscreen(planet) {
@@ -131,7 +156,6 @@ function doPolarityPhys() {
       if (planetIsOffscreen(planet)) {
         if (Math.abs(p5.Vector.sub(planet.pos, pos).heading() - vel.heading()) > Math.PI / 2) {
           planets.splice(i, 1);
-          console.log("Deleted planet");
           continue;
         }
       }
@@ -147,6 +171,11 @@ function doPolarityPhys() {
         vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(-100 / (dis * 0.2) ** 2));
       } else { //attract
         vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(100 / (dis * 0.2) ** 2));
+      }
+    }
+    if (planet.station && dis < magFieldRad + rad) {
+      if (fuel != 100) {
+        fuel++;
       }
     }
   }
