@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay;
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 200;
@@ -14,6 +14,7 @@ function setup() {
 }
 
 function restart() {
+  gameState = 0;
   cameraPos = new p5.Vector(0, 0);
   vel = new p5.Vector(3, 0);
   avgXVel = 0;
@@ -24,17 +25,24 @@ function restart() {
   lastCreation = 0;
   wallPos = -500;
   fuel = 100;
-  score = 0;
+  pointsDelay = 60;
+  scoreText.innerHTML = 0;
 }
 
 function draw() {
   resetMatrix();
-  cameraPos.set(-pos.x + 640 - avgXVel * 35, -pos.y + 360 - avgYVel * 20);
-  translate(cameraPos.x, cameraPos.y);
   background(0);
-  updatePhys();
-  avgXVel += (vel.x - avgXVel) * 0.01;
-  avgYVel += (vel.y - avgYVel) * 0.01;
+  if (!gameState) {
+    updatePhys();
+    avgXVel += (vel.x - avgXVel) * 0.01;
+    avgYVel += (vel.y - avgYVel) * 0.01;
+    cameraPos.set(Math.floor(-pos.x + 640 - avgXVel * 35), Math.floor(-pos.y + 360 - avgYVel * 20));
+    if (pos.x - wallPos < rad) {
+      gameState = 1;
+      textSize(50);
+    }
+  }
+  translate(cameraPos.x, cameraPos.y);
   drawPlanets();
   drawMe();
   drawWall();
@@ -42,17 +50,25 @@ function draw() {
 }
 
 function doUI() {
-  if (frameCount % 60 == 0) {
-    scoreText.innerHTML = int(scoreText.innerHTML) + 100;
+  if (!gameState) {
+    if (pointsDelay == 0) {
+      scoreText.innerHTML = int(scoreText.innerHTML) + 100;
+      pointsDelay = 60;
+    } else {
+      pointsDelay--;
+    }
+    if (fuel < 30) {
+      fill(255,sin(frameCount/50)*70);
+      rect(-cameraPos.x,-cameraPos.y,width,height);
+    }
+    fill(255);
+    rect(Math.floor(pos.x - 55), Math.floor(pos.y - 55), 110, 20);
+    fill(0);
+    rect(Math.floor(pos.x - fuel/2),Math.floor(pos.y - 50), fuel , 10);
+  } else {
+    fill(255);
+    text("YOU LOSE", -cameraPos.x + width/2, -cameraPos.y + height/2);
   }
-  if (fuel < 30) {
-    fill(255,sin(frameCount/50)*70);
-    rect(-cameraPos.x,-cameraPos.y,width,height);
-  }
-  fill(255);
-  rect(pos.x - 55, pos.y - 55, 110, 20);
-  fill(0);
-  rect(pos.x - fuel/2,pos.y - 50, fuel , 10);
 }
 
 function drawWall() {
@@ -85,7 +101,7 @@ function drawPlanets() {
 
 function updatePhys() {
   pos.add(vel);
-  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount; fuel--;}
+  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount; if(fuel != 0) fuel--;}
   doPolarityPhys();
 }
 
@@ -184,7 +200,7 @@ function doPolarityPhys() {
 function keyPressed() {
   if (key == 'R') {
     restart();
-  } else if (key == " ") {
+  } else if (key == " " && fuel != 0) {
     polarity = !polarity;
   }
 }
