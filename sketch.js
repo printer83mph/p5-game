@@ -98,7 +98,7 @@ function drawMe() {
 function drawPlanets() {
   for (i in planets) {
     let planet = planets[i];
-    fill(planet.polarity ? "#008" : "#800"); //mag field
+    fill(planet.polarity ? (planet.station ? "#44a" : "#008") : (planet.station ? "#a44" : "#800")); //mag field
     ellipse(planet.pos.x, planet.pos.y, planet.magRad * 2);
     if (planet.station) {
       fill(planet.polarity ? "#ccf" : "#fcc");
