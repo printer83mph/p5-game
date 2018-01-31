@@ -89,9 +89,9 @@ function drawWall() {
 
 function drawMe() {
   stroke(polarity ? (fuel == 0 ? "#007" : "#00f") : (fuel == 0 ? "#700" : "#f00"));
-  strokeWeight(2);
+  strokeWeight(4);
   fill(255);
-  ellipse(pos.x, pos.y, rad * 2 - 1); //player
+  ellipse(pos.x, pos.y, rad * 2 - 2); //player
   noStroke();
 }
 
