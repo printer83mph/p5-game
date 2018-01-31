@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay, distText, hpright, nextCheckpoint;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay, distText, hpright, nextCheckpoint, retries, flashIntensity, flashColor;
 const rad = 10;
 
 function setup() {
@@ -10,11 +10,18 @@ function setup() {
   strokeWeight(3);
   noStroke();
   restart();
-  textSize(24);
+  textSize(50);
 }
 
 function restart() {
   gameState = 0;
+  scoreText.innerHTML = "0";
+  distText.innerHTML = "0";
+  retries = 0;
+  start();
+}
+
+function start() {
   cameraPos = new p5.Vector(0, 0);
   vel = new p5.Vector(3, 0);
   avgXVel = 0;
@@ -27,8 +34,6 @@ function restart() {
   fuel = 100;
   pointsDelay = 60;
   nextCheckpoint = 6000;
-  scoreText.innerHTML = "0";
-  distText.innerHTML = "0";
 }
 
 function draw() {
@@ -41,16 +46,38 @@ function draw() {
     avgYVel += (vel.y - avgYVel) * 0.01;
     cameraPos.set(-pos.x + 640 - avgXVel * 35, -pos.y + 360 - avgYVel * 20);
     if (pos.x - wallPos < rad) {
-      gameState = 1;
-      textSize(50);
+      hurt();
     }
   }
   translate(cameraPos.x, cameraPos.y);
   drawPlanets();
   drawMe();
   drawWall();
+  drawFlash();
   // drawLines();
   doUI();
+}
+
+function drawFlash() {
+  if (flashIntensity > 0) {
+    background(flashColor[0], flashColor[1], flashColor[2], flashIntensity);
+    flashIntensity--;
+  }
+}
+
+function flashScreen(color) {
+  flashIntensity = 100;
+  flashColor = color;
+}
+
+function hurt() {
+  if (retries > 0) {
+    start();
+    flashScreen([255,0,255]);
+    retries --;
+  } else {
+    gameState = 1;
+  }
 }
 
 function doUI() {
@@ -60,10 +87,6 @@ function doUI() {
       pointsDelay = 60;
     } else {
       pointsDelay--;
-    }
-    if (fuel < 30) {
-      fill(255,sin(frameCount/50)*70);
-      rect(-cameraPos.x,-cameraPos.y,width,height);
     }
     distText.innerHTML = int((pos.x - wallPos)/100);
     hpright.style.top = 720 - fuel * 7.2 + "px";
@@ -87,7 +110,7 @@ function drawLines() {
 function drawWall() {
   fill(255,0,255);
   rect(-cameraPos.x, -cameraPos.y, max(0,wallPos+cameraPos.x), height);
-  wallPos += 3;
+  wallPos += 2;
 }
 
 function drawMe() {
@@ -118,9 +141,11 @@ function updatePhys() {
 }
 
 function levelUp() {
-  console.log("leveled up");
   wallPos = int(pos.x - 500);
   nextCheckpoint = pos.x + 6000;
+  flashScreen([255,255,255]);
+  retries = 1;
+  fuel = 100;
 }
 
 function Planet(x, y, pol, rad) {
