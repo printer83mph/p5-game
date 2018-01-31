@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay, distText, hpright;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay, distText, hpright, nextCheckpoint;
 const rad = 10;
 
 function setup() {
@@ -26,6 +26,7 @@ function restart() {
   wallPos = -500;
   fuel = 100;
   pointsDelay = 60;
+  nextCheckpoint = 6000;
   scoreText.innerHTML = "0";
   distText.innerHTML = "0";
 }
@@ -71,6 +72,8 @@ function doUI() {
     fill(255);
     text("YOU LOST", -cameraPos.x + width/2 - 50, -cameraPos.y + height/2 - 20);
   }
+  fill(255);
+  rect(nextCheckpoint, -cameraPos.y, 10, height);
 }
 
 function drawLines() {
@@ -109,8 +112,15 @@ function drawPlanets() {
 
 function updatePhys() {
   pos.add(vel);
-  if (frameCount - lastCreation > 120/vel.mag()) {createPlanet(); lastCreation = frameCount; if(fuel != 0) fuel--;}
+  if (frameCount - lastCreation > 120/vel.mag()) { createPlanet(); lastCreation = frameCount; if(fuel != 0) fuel--; }
+  if (pos.x + rad > nextCheckpoint) { levelUp(); }
   doPolarityPhys();
+}
+
+function levelUp() {
+  console.log("leveled up");
+  wallPos = int(pos.x - 500);
+  nextCheckpoint = pos.x + 6000;
 }
 
 function Planet(x, y, pol, rad) {
