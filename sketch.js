@@ -1,5 +1,5 @@
 /* p5 magnet game with willybh */
-var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay;
+var pos, vel, polarity, planets, avgXVel, cameraPos, lastCreation, wallPos, fuel, scoreText, gameState, pointsDelay, distText;
 const rad = 10;
 const planetRad = 70;
 const magFieldRad = 200;
@@ -7,6 +7,7 @@ const magFieldRad = 200;
 function setup() {
   createCanvas(1280, 720);
   scoreText = document.getElementById("score");
+  distText = document.getElementById("distance");
   strokeWeight(3);
   noStroke();
   restart();
@@ -26,7 +27,8 @@ function restart() {
   wallPos = -500;
   fuel = 100;
   pointsDelay = 60;
-  scoreText.innerHTML = 0;
+  scoreText.innerHTML = "0";
+  distText.innerHTML = "0";
 }
 
 function draw() {
@@ -65,6 +67,7 @@ function doUI() {
     rect(Math.floor(pos.x - 55), Math.floor(pos.y - 55), 110, 20);
     fill(0);
     rect(Math.floor(pos.x - fuel/2),Math.floor(pos.y - 50), fuel , 10);
+    distText.innerHTML = int((pos.x - wallPos)/10);
   } else {
     fill(255);
     text("YOU LOSE", -cameraPos.x + width/2, -cameraPos.y + height/2);
@@ -74,7 +77,7 @@ function doUI() {
 function drawWall() {
   fill(255,0,255);
   rect(-cameraPos.x, -cameraPos.y, max(0,wallPos+cameraPos.x), height);
-  wallPos += 2;
+  wallPos += 3;
 }
 
 function drawMe() {
@@ -89,11 +92,8 @@ function drawPlanets() {
     let planet = planets[i];
     fill(planet.polarity ? "#008" : "#800"); //mag field
     ellipse(planet.pos.x, planet.pos.y, magFieldRad * 2);
-  }
-  for (i in planets) {
-    let planet = planets[i];
     if (planet.station) {
-      fill(0,255,255);
+      fill(planet.polarity ? "#ccf" : "#fcc");
     } else {fill(planet.polarity ? "#00f" : "#f00");} //planet
     ellipse(planet.pos.x, planet.pos.y, planetRad * 2);
   }
@@ -184,9 +184,9 @@ function doPolarityPhys() {
       vel.sub(p5.Vector.mult(vecFromPlanet, vel.dot(vecFromPlanet) * 1.5));
     } else {
       if (polarity == planet.polarity) { //repel
-        vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(-100 / (dis * 0.2) ** 2));
+        vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(-100 / (dis * 0.2) ** 2)); //chjange these 100s
       } else { //attract
-        vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(100 / (dis * 0.2) ** 2));
+        vel.add(p5.Vector.sub(planet.pos, pos).normalize().mult(100 / (dis * 0.2) ** 2)); //same
       }
     }
     if (planet.station && dis < magFieldRad + rad) {
